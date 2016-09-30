@@ -4,21 +4,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.IO;
-using RestSharp;
-using System.Xml.Linq;
 using System.Xml.Serialization;
-using System.Threading;
-using System.ComponentModel;
 using Windows.System.Threading;
-using Windows.UI.Xaml;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Diagnostics;
-using System.Collections;
+using ForecastIOPortable;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Deps
 {
-    class Engine
+    public class Engine
     {
         /*
          * Ideas:
@@ -31,20 +28,24 @@ namespace Deps
          * - weather (i.e. its raining)
          * - next train north (rotating display)
          * - next train south 
+         * platform (over the bridge)
          */
+        
+        public enum BoardStatus:int {TOOLATE = 6, RUNNOW = 8,GONOW=10, DRINKUP = 16, GETDRINK = 26, NORMAL };
+
+        ForecastApi weather = new ForecastApi("91a059370a899851a4aa05a290ff0f4b");
+        double lat = 54.7794;
+        double lng = -1.5817600000000311;
 
         public Engine()
         {
-
+            
         }
 
         const string AccessToken = "53bedd9b-1a10-4ce3-b645-07638c19c0d2";
         const string Crs = "DHM";
-        const int TimeWindow = 60;
+        const int TimeWindow = 70;
         const int Rows = 20;
-        internal static TimeSpan WALKING_TIME = TimeSpan.FromMinutes(6);
-        internal static TimeSpan LAST_DRINK_TIME = TimeSpan.FromMinutes(15);
-        internal static TimeSpan LAST_LOO_TIME = TimeSpan.FromMinutes(10);
 
         private async Task GetBoard()
         {
@@ -66,15 +67,41 @@ namespace Deps
                 $"    </ns1:GetDepBoardWithDetailsRequest>" +
                 $"  </SOAP-ENV:Body>" +
                 $"</SOAP-ENV:Envelope>";
-                var client = new RestClient("https://lite.realtime.nationalrail.co.uk");
-                var request = new RestRequest("OpenLDBWS/ldb9.asmx");
-                request.RequestFormat = DataFormat.Xml;
-                request.AddParameter("text/xml", xml, ParameterType.RequestBody);
-                var res = await client.ExecutePostTaskAsync<XObject>(request);
 
-                XmlReaderSettings settings = new XmlReaderSettings();
+                string res;
+                HttpResponseMessage result;
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("https://lite.realtime.nationalrail.co.uk");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    result = await client.PostAsync("/OpenLDBWS/ldb9.asmx", new StringContent(xml,Encoding.UTF8,"text/xml"));
+                }
+
+                res = await result.Content.ReadAsStringAsync();
+
+                    //var res = await "https://lite.realtime.nationalrail.co.uk/OpenLDBWS/ldb9.asmx"
+                    ////.AppendPathSegments("OpenLDBWS","ldb9.asmx")
+                    //.WithHeader("Accept", "text/xml")
+                    ////.WithHeader("Content-Type","text/xml")
+                    //.PostStringAsync(xml)
+                    //.ReceiveString();
+                    //var client = new RestClient();
+                    //client.BaseUrl = "https://lite.realtime.nationalrail.co.uk";
+                    //var request = new RestRequest("/OpenLDBWS/ldb9.asmx",HttpMethod.Post);
+                    //request.ContentType = ContentTypes.ByteArray;
+                    //request.IgnoreXmlAttributes = true;
+                    //request.AddParameter(Encoding.UTF8.GetBytes(xml));
+                    //request.ReturnRawString = true;
+                    //request.RequestFormat = DataFormat.Xml;
+                    //request.AddParameter("text/xml", xml, ParameterType.RequestBody);
+                    //request.Method = Method.POST;
+
+                    //var res = await client.ExecuteAsync<string>(request);
+
+                    XmlReaderSettings settings = new XmlReaderSettings();
                 //settings.ConformanceLevel = ConformanceLevel.Fragment;
-                using (var reader = XmlReader.Create(new StringReader(res.Content)))
+                using (var reader = XmlReader.Create(new StringReader(res)))
                 {
                     Message m = Message.CreateMessage(reader, int.MaxValue, MessageVersion.Soap11);
                     string contents = m.GetReaderAtBodyContents().ReadInnerXml();
@@ -94,6 +121,7 @@ namespace Deps
                 //failed to load data
                 Debug.WriteLine("Failed to load data " + e.Message);
             }
+
         }
 
         public event Action<DateTime> OnLatestData;
@@ -110,6 +138,7 @@ namespace Deps
 
         public ObservableCollection<trainServicesService> CurrentTrains { get; private set; }
         public event Action OnUpdate;
+        public event Action<string> OnWeatherUpdate;
 
         public async Task InitLoad()
         {
@@ -118,8 +147,22 @@ namespace Deps
             {
                 Task.WaitAll(GetBoard());
             }, TimeSpan.FromMinutes(0.2));
+
+            await GetWeather();
+            ThreadPoolTimer weather_timer = ThreadPoolTimer.CreatePeriodicTimer((source) =>
+            {
+                Task.WaitAll(GetWeather());
+            }, TimeSpan.FromMinutes(5));
         }
-        
+
+        private async Task GetWeather()
+        {
+            var current_weather = await weather.GetWeatherDataAsync(lat, lng, Unit.UK, Language.English);
+            LastWeatherMinutely = current_weather.Minutely;
+            OnWeatherUpdate?.Invoke(current_weather.Currently.Icon);
+        }
+
+        public static ForecastIOPortable.Models.MinutelyForecast LastWeatherMinutely { get; private set; }
     }
 
     /// <remarks/>
@@ -216,25 +259,99 @@ namespace Deps
         }
     }
 
-    
-
     /// <remarks/>
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://thalesgroup.com/RTTI/2016-02-16/ldb/types")]
     public partial class trainServicesService
     {
-        public bool IsRunNow
-        {
-           get
-           {
-                return Expected.Subtract(DateTime.Now.TimeOfDay) > Engine.WALKING_TIME && Expected.Subtract(DateTime.Now.TimeOfDay) < (Engine.WALKING_TIME + TimeSpan.FromMinutes(5));
-           }
-        }
+        //public object StatusIcon
+        //{
+        //    get
+        //    {
+        //        BitmapImage image = new BitmapImage();
 
-        public bool IsMissed
+        //        try
+        //        {
+        //            //image.BeginInit();
+        //            //image.CacheOption = BitmapCacheOption.OnLoad;
+        //            //image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+        //            image.UriSource = new Uri(CurrentStatus.ToString().ToLower());
+        //            //image.EndInit();
+        //        }
+        //        catch
+        //        {
+        //            return DependencyProperty.UnsetValue;
+        //        }
+
+        //        return image;
+        //    }
+        //}
+
+        public TimeSpan TimeLeft
         {
             get
             {
-                return Expected.Subtract(DateTime.Now.TimeOfDay) < Engine.WALKING_TIME;
+                return Expected.Subtract(DateTime.Now.TimeOfDay) - TimeSpan.FromMinutes((int)Engine.BoardStatus.TOOLATE);
+            }
+        }
+
+        public TimeSpan TimeLeftActual
+        {
+            get
+            {
+                return Expected.Subtract(DateTime.Now.TimeOfDay);
+            }
+        }
+
+        public string Weather
+        {
+            get
+            {
+                int mins = (int)Expected.Subtract(DateTime.Now.TimeOfDay).Minutes;
+                if (mins < 60 && mins > 0 && Engine.LastWeatherMinutely?.Minutes[mins].PrecipitationProbability  > 0)
+                    return $"{Engine.LastWeatherMinutely?.Minutes[mins].PrecipitationProbability*100}% chance of {Engine.LastWeatherMinutely?.Minutes[mins].PrecipitationType}";
+                else
+                    return null;
+            }
+        }
+
+        // TOOLATE = 6, RUNNOW = 8, DRINKUP = 16, LOOBREAK = 20, GETDRINK = 26
+        public Engine.BoardStatus CurrentStatus
+        {
+            get
+            {
+                var timeleft = Expected.Subtract(DateTime.Now.TimeOfDay);
+                if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.TOOLATE))
+                {
+                    return Engine.BoardStatus.TOOLATE;
+                }
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.RUNNOW))
+                {
+                    return Engine.BoardStatus.RUNNOW;
+                }
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.GONOW))
+                {
+                    return Engine.BoardStatus.GONOW;
+                }
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.DRINKUP))
+                {
+                    return Engine.BoardStatus.DRINKUP;
+                }
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.GETDRINK))
+                {
+                    return Engine.BoardStatus.GETDRINK;
+                }
+                else
+                {
+                    return Engine.BoardStatus.NORMAL;
+                }
+            }
+        }
+
+        public bool IsTooLate
+        {
+            get
+            {
+                return CurrentStatus == Engine.BoardStatus.TOOLATE;
             }
         }
 
@@ -248,7 +365,7 @@ namespace Deps
 
         public override bool Equals(object obj)
         {
-            return serviceIDField == (obj as trainServicesService).serviceIDField && etd == (obj as trainServicesService).etd;
+            return serviceIDField == (obj as trainServicesService).serviceIDField && etd == (obj as trainServicesService).etd && CurrentStatus== (obj as trainServicesService).CurrentStatus && IsLate == (obj as trainServicesService).IsLate && TimeLeft == (obj as trainServicesService).TimeLeft && TimeLeftActual == (obj as trainServicesService).TimeLeftActual;
         }
 
         public override int GetHashCode()
@@ -268,16 +385,19 @@ namespace Deps
         {
             get
             {
-                try
+                TimeSpan res;
+                if (TimeSpan.TryParse(etdField, out res))
                 {
-                    return TimeSpan.Parse(etdField);
+                    return res;
                 }
-                catch
-                {
+                else
+                { 
                     return Due;
                 }
             }
         }
+
+
 
         private string stdField;
 

@@ -3,16 +3,36 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deps"
+    xmlns:trig="using:UWPDataTrigger"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    
+    <Page.Resources>
+        <SolidColorBrush x:Key="primary">#FFFFF974</SolidColorBrush>
+        <local:TimeLeftConverter x:Key="TimeLeftConverter" />
+        <local:StatusIconConverter x:Key="StatusIconConverter" />
+    </Page.Resources>
     <Grid Background="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ListView x:Name="alltrains" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalAlignment="Stretch">
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="135"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Margin="10" Padding="10" FontSize="34" FontFamily="Score Board" x:Name="time"  HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="#528626"/>
+            <TextBlock Grid.Column="1"   TextAlignment="Right" HorizontalAlignment="Stretch"  Padding="10" Text="It's" FontSize="24" FontFamily="Score Board" VerticalAlignment="Center" Foreground="#528626"/>
+            <TextBlock Grid.Column="2" x:Name="mainweather" TextAlignment="Center" Padding="10" FontSize="34" FontFamily="Assets/weathericons-regular-webfont.ttf#Weather Icons" VerticalAlignment="Center" Foreground="#528626"/>
+            <TextBlock HorizontalAlignment="Stretch" Grid.Column="3" Padding="10" Text="outside" FontSize="24" FontFamily="Score Board" VerticalAlignment="Center" Foreground="#528626"/>
+        </Grid>
+
+        <ListView Grid.Row="1" x:Name="alltrains" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Stretch" SelectionMode="None" HorizontalContentAlignment="Stretch" VerticalAlignment="Stretch">
             <ListView.ItemContainerTransitions>
                 <TransitionCollection/>
             </ListView.ItemContainerTransitions>
@@ -23,26 +43,64 @@
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="10" HorizontalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="*"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock  VerticalAlignment="Top" FontSize="34" Text="{Binding std}" FontFamily="Score Board" Foreground="#FFFFF974" Margin="0,0,10,0"></TextBlock>
-                        <!--<Rectangle Fill="Red" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Rectangle>-->
-                        <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Stretch">
-                            <TextBlock FontSize="34" Text="{Binding destination.location.locationName}" FontFamily="Score Board" Foreground="#FFFFF974"></TextBlock>
-                            <TextBlock  FontSize="20" Text="{Binding subsequentCallingPoints}" FontFamily="Score Board" Foreground="#FFFFF974" HorizontalAlignment="Stretch" TextWrapping="WrapWholeWords" TextTrimming="CharacterEllipsis"></TextBlock>
-                        </StackPanel>
-                        <TextBlock Grid.Column="2" TextAlignment="Right" Text="{Binding IsLate}" FontFamily="Score Board" Foreground="#FFA8A8A8"></TextBlock>
-                        <TextBlock Grid.Column="2" TextAlignment="Right" Text="{Binding IsMissed}" FontFamily="Score Board" Foreground="#FFA8A8A8"></TextBlock>
-                        <TextBlock Grid.Column="2" TextAlignment="Right" Text="{Binding IsRunNow}" FontFamily="Score Board" Foreground="#FFA8A8A8"></TextBlock>
-                    </Grid>
+                    <UserControl>
+                        <Grid x:Name="grid" Padding="10" HorizontalAlignment="Stretch">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup>
+                                    <VisualState>
+                                        <VisualState.StateTriggers>
+                                            <trig:BooleanDataTrigger trig:BooleanDataTrigger.TriggerValue="True" trig:BooleanDataTrigger.DataValue="{Binding IsLate}" />
+                                        </VisualState.StateTriggers>
+                                        <VisualState.Setters>
+                                            <Setter Target="etd.Visibility" Value="Visible" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup>
+                                    <VisualState>
+                                        <VisualState.StateTriggers>
+                                            <trig:BooleanDataTrigger trig:BooleanDataTrigger.TriggerValue="True" trig:BooleanDataTrigger.DataValue="{Binding IsTooLate}" />
+                                        </VisualState.StateTriggers>
+                                        <VisualState.Setters>
+                                            <Setter Target="grid.Opacity" Value="0.2" />
+                                            <Setter Target="callingpoints.Visibility" Value="Collapsed"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Vertical">
+                                <TextBlock VerticalAlignment="Top" FontSize="34" Text="{Binding std}" FontFamily="Score Board" Foreground="{StaticResource primary}" Margin="0,0,10,0"/>
+                                <TextBlock x:Name="etd" Visibility="Collapsed" VerticalAlignment="Top" FontSize="34" Text="{Binding etd}" FontFamily="Score Board" Foreground="Red" Margin="0,0,10,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0" Orientation="Vertical" HorizontalAlignment="Stretch">
+                                <TextBlock FontSize="34" Text="{Binding destination.location.locationName}" FontFamily="Score Board" Foreground="{StaticResource primary}"/>
+                                <TextBlock x:Name="callingpoints" FontSize="20" Text="{Binding subsequentCallingPoints}" FontFamily="Score Board" Foreground="{StaticResource primary}" HorizontalAlignment="Stretch" TextWrapping="WrapWholeWords" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Vertical">
+                                <TextBlock FontSize="34" Text="{Binding Converter={StaticResource StatusIconConverter}}" Foreground="{StaticResource primary}" FontFamily="Assets/materialdesignicons-webfont.ttf#Material Design Icons" ></TextBlock>
+                                <TextBlock TextAlignment="Right" Text="{Binding Weather}" FontFamily="Score Board" Foreground="{StaticResource primary}"/>
+                            </StackPanel>
+                        </Grid>
+                    </UserControl>
                 </DataTemplate>
             </ListView.ItemTemplate>
-            
+
         </ListView>
-        <TextBlock Grid.Row="1" x:Name="updatedat" FontFamily="Score Board" Text="{Binding}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Foreground="#528626"></TextBlock>
+
+        <Grid Grid.Row="2" HorizontalAlignment="Stretch" Opacity="0.5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0" Source="NRE_Powered_logo.png" HorizontalAlignment="Right" Height="20"></Image>
+            <Image Grid.Column="1"  Source="poweredby-oneline-darkbackground.png" HorizontalAlignment="Left" Height="30"></Image>
+            <TextBlock Grid.Column="2" Padding="10" x:Name="updatedat" FontFamily="Score Board" Text="{Binding}" VerticalAlignment="Center"  HorizontalAlignment="Center" Foreground="White"/>
+        </Grid>
     </Grid>
 </Page>

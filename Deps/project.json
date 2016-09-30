@@ -1,8 +1,9 @@
 ﻿{
   "dependencies": {
-    "HockeySDK.UWP": "4.1.3",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.1.0",
-    "Restsharp.BleedingEdge": "105.3.2"
+    "ForecastIOPortable": "2.6.0",
+    "HockeySDK.UWP": "4.1.5",
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
+    "UWPDataTrigger": "1.0.0"
   },
   "frameworks": {
     "uap10.0": {}

@@ -4,5 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Deps"
     RequestedTheme="Dark">
-
+    <Application.Resources>
+        <SolidColorBrush x:Key="PrimaryColor" Color="#FFFFF974"></SolidColorBrush>
+    </Application.Resources>
 </Application>

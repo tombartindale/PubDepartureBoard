@@ -1,8 +1,0 @@
-<configuration>
-    <configSections>
-      <security mode="TransportWithMessageCredential">
-        <transport clientCredentialType="None" proxyCredentialType="None" realm="" />
-        <message clientCredentialType="UserName" algorithmSuite="Default" />
-      </security>
-    </configSections>
-</configuration>
