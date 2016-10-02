@@ -17,35 +17,31 @@ namespace Deps
 {
     public class Engine
     {
-        /*
-         * Ideas:
-         * - time for toilet break
-         * - run  to station now
-         * - time for another beer
-         * - drink up
-         * - another train to same place in ? mins
-         * - last train
-         * - weather (i.e. its raining)
-         * - next train north (rotating display)
-         * - next train south 
-         * platform (over the bridge)
-         */
-        
-        public enum BoardStatus:int {TOOLATE = 6, RUNNOW = 8,GONOW=10, DRINKUP = 16, GETDRINK = 26, NORMAL };
+        /// <summary>
+        /// Constants & API Keys -- EDIT THESE!
+        /// </summary>
+        const string DARKSKY_API_KEY = "91a059370a899851a4aa05a290ff0f4b";
+        const string RAIL_API_KEY = "53bedd9b-1a10-4ce3-b645-07638c19c0d2";
+        const string STATION_CRS = "DHM";
+        const double LOCATION_LAT = 54.7794;
+        const double LOCATION_LNG = -1.5817600000000311;
+        /// <summary>
+        /// Optional things that can be changed
+        /// </summary>
+        const int GET_DRINK_TIME = 26;
+        const int DRINK_UP_TIME = 16;
+        const int WALK_TIME_TO_STATION = 10;
+        const int RUN_TIME_TO_STATION = 8;
+        const int TOO_LATE = 6;
+        const int TIME_WINDOW = 70;
+        const int MAX_ROWS = 20;
 
-        ForecastApi weather = new ForecastApi("91a059370a899851a4aa05a290ff0f4b");
-        double lat = 54.7794;
-        double lng = -1.5817600000000311;
 
-        public Engine()
-        {
-            
-        }
-
-        const string AccessToken = "53bedd9b-1a10-4ce3-b645-07638c19c0d2";
-        const string Crs = "DHM";
-        const int TimeWindow = 70;
-        const int Rows = 20;
+        /// <summary>
+        /// DO NOT EDIT BELOW THIS LINE!
+        /// </summary>
+        public enum BoardStatus:int {TOOLATE = TOO_LATE, RUNNOW = RUN_TIME_TO_STATION,GONOW=WALK_TIME_TO_STATION, DRINKUP = DRINK_UP_TIME, GETDRINK = GET_DRINK_TIME, NORMAL };
+        ForecastApi weather = new ForecastApi(DARKSKY_API_KEY);
 
         private async Task GetBoard()
         {
@@ -54,16 +50,16 @@ namespace Deps
                 string xml = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 $"<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ns1=\"http://thalesgroup.com/RTTI/2016-02-16/ldb/\">" +
                 $"  <SOAP-ENV:Header xmlns:ns2=\"http://thalesgroup.com/RTTI/2010-11-01/ldb/commontypes\">" +
-                $"    <ns2:AccessToken><ns2:TokenValue>{AccessToken}</ns2:TokenValue></ns2:AccessToken>" +
+                $"    <ns2:AccessToken><ns2:TokenValue>{RAIL_API_KEY}</ns2:TokenValue></ns2:AccessToken>" +
                 $"  </SOAP-ENV:Header>" +
                 $"  <SOAP-ENV:Body>" +
                 $"    <ns1:GetDepBoardWithDetailsRequest>" +
-                $"      <ns1:numRows>{Rows}</ns1:numRows>" +
-                $"      <ns1:crs>{Crs}</ns1:crs>" +
+                $"      <ns1:numRows>{MAX_ROWS}</ns1:numRows>" +
+                $"      <ns1:crs>{STATION_CRS}</ns1:crs>" +
                 $"      <ns1:filterCrs></ns1:filterCrs>" +
                 $"      <ns1:filterType>from</ns1:filterType>" +
                 $"      <ns1:timeOffset>0</ns1:timeOffset>" +
-                $"      <ns1:timeWindow>{TimeWindow}</ns1:timeWindow>" +
+                $"      <ns1:timeWindow>{TIME_WINDOW}</ns1:timeWindow>" +
                 $"    </ns1:GetDepBoardWithDetailsRequest>" +
                 $"  </SOAP-ENV:Body>" +
                 $"</SOAP-ENV:Envelope>";
@@ -80,27 +76,8 @@ namespace Deps
 
                 res = await result.Content.ReadAsStringAsync();
 
-                    //var res = await "https://lite.realtime.nationalrail.co.uk/OpenLDBWS/ldb9.asmx"
-                    ////.AppendPathSegments("OpenLDBWS","ldb9.asmx")
-                    //.WithHeader("Accept", "text/xml")
-                    ////.WithHeader("Content-Type","text/xml")
-                    //.PostStringAsync(xml)
-                    //.ReceiveString();
-                    //var client = new RestClient();
-                    //client.BaseUrl = "https://lite.realtime.nationalrail.co.uk";
-                    //var request = new RestRequest("/OpenLDBWS/ldb9.asmx",HttpMethod.Post);
-                    //request.ContentType = ContentTypes.ByteArray;
-                    //request.IgnoreXmlAttributes = true;
-                    //request.AddParameter(Encoding.UTF8.GetBytes(xml));
-                    //request.ReturnRawString = true;
-                    //request.RequestFormat = DataFormat.Xml;
-                    //request.AddParameter("text/xml", xml, ParameterType.RequestBody);
-                    //request.Method = Method.POST;
 
-                    //var res = await client.ExecuteAsync<string>(request);
-
-                    XmlReaderSettings settings = new XmlReaderSettings();
-                //settings.ConformanceLevel = ConformanceLevel.Fragment;
+                XmlReaderSettings settings = new XmlReaderSettings();
                 using (var reader = XmlReader.Create(new StringReader(res)))
                 {
                     Message m = Message.CreateMessage(reader, int.MaxValue, MessageVersion.Soap11);
@@ -157,7 +134,7 @@ namespace Deps
 
         private async Task GetWeather()
         {
-            var current_weather = await weather.GetWeatherDataAsync(lat, lng, Unit.UK, Language.English);
+            var current_weather = await weather.GetWeatherDataAsync(LOCATION_LAT, LOCATION_LNG, Unit.UK, Language.English);
             LastWeatherMinutely = current_weather.Minutely;
             OnWeatherUpdate?.Invoke(current_weather.Currently.Icon);
         }
@@ -263,29 +240,6 @@ namespace Deps
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://thalesgroup.com/RTTI/2016-02-16/ldb/types")]
     public partial class trainServicesService
     {
-        //public object StatusIcon
-        //{
-        //    get
-        //    {
-        //        BitmapImage image = new BitmapImage();
-
-        //        try
-        //        {
-        //            //image.BeginInit();
-        //            //image.CacheOption = BitmapCacheOption.OnLoad;
-        //            //image.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-        //            image.UriSource = new Uri(CurrentStatus.ToString().ToLower());
-        //            //image.EndInit();
-        //        }
-        //        catch
-        //        {
-        //            return DependencyProperty.UnsetValue;
-        //        }
-
-        //        return image;
-        //    }
-        //}
-
         public TimeSpan TimeLeft
         {
             get

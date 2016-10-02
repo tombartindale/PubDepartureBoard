@@ -29,6 +29,8 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <UseDotNetNativeToolchain>false</UseDotNetNativeToolchain>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -63,7 +65,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+    <UseDotNetNativeToolchain>false</UseDotNetNativeToolchain>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -92,6 +94,7 @@
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
     <Content Include="Assets\weathericons-regular-webfont.ttf" />
     <Content Include="Assets\materialdesignicons-webfont.ttf" />
+    <Content Include="Assets\scoreboard.ttf" />
     <None Include="project.json" />
     <None Include="Service References\HockeyApp\ConnectedService.json" />
   </ItemGroup>
@@ -145,34 +148,15 @@
     <Content Include="Assets\wind.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Cloud-Rain.svg" />
-    <Content Include="NRE_Powered_logo.png" />
-    <Content Include="poweredby-darkbackground.png" />
-    <Content Include="poweredby-oneline-darkbackground.png" />
+    <Content Include="Assets\NRE_Powered_logo.png" />
+    <Content Include="Assets\poweredby-oneline-darkbackground.png" />
     <Content Include="Properties\Default.rd.xml" />
-    <Content Include="TextFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Assets\beer.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Assets\BuyNow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Assets\cash.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Assets\run.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
