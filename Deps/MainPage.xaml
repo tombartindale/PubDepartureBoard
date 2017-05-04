@@ -21,15 +21,15 @@
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="135"></ColumnDefinition>
+                <ColumnDefinition Width="180"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Margin="10" Padding="10" FontSize="34" FontFamily="Assets/scoreboard.ttf#Score Board" x:Name="time"  HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="#528626"/>
-            <TextBlock Grid.Column="1"   TextAlignment="Right" HorizontalAlignment="Stretch"  Padding="10" Text="It's" FontSize="24" FontFamily="Assets/scoreboard.ttf#Score Board" VerticalAlignment="Center" Foreground="#528626"/>
-            <TextBlock Grid.Column="2" x:Name="mainweather" TextAlignment="Center" Padding="10" FontSize="34" FontFamily="Assets/weathericons-regular-webfont.ttf#Weather Icons" VerticalAlignment="Center" Foreground="#528626"/>
-            <TextBlock HorizontalAlignment="Stretch" Grid.Column="3" Padding="10" Text="outside" FontSize="24" FontFamily="Assets/scoreboard.ttf#Score Board" VerticalAlignment="Center" Foreground="#528626"/>
+            <TextBlock Grid.Column="0" Margin="10" Padding="10" FontSize="56" FontFamily="Assets/scoreboard.ttf#Score Board" x:Name="time"  HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="#528626"/>
+            <TextBlock Grid.Column="1"   TextAlignment="Right" HorizontalAlignment="Stretch"  Padding="10" Text="It's" FontSize="36" FontFamily="Assets/scoreboard.ttf#Score Board" VerticalAlignment="Center" Foreground="#528626"/>
+            <TextBlock Grid.Column="2" x:Name="mainweather" TextAlignment="Center" Padding="10" FontSize="36" FontFamily="Assets/weathericons-regular-webfont.ttf#Weather Icons" VerticalAlignment="Center" Foreground="#528626"/>
+            <TextBlock HorizontalAlignment="Stretch" Grid.Column="3" Padding="10" Text="outside" FontSize="36" FontFamily="Assets/scoreboard.ttf#Score Board" VerticalAlignment="Center" Foreground="#528626"/>
         </Grid>
 
         <ListView Grid.Row="1" x:Name="alltrains" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Stretch" SelectionMode="None" HorizontalContentAlignment="Stretch" VerticalAlignment="Stretch">
@@ -62,28 +62,28 @@
                                             <trig:BooleanDataTrigger trig:BooleanDataTrigger.TriggerValue="True" trig:BooleanDataTrigger.DataValue="{Binding IsTooLate}" />
                                         </VisualState.StateTriggers>
                                         <VisualState.Setters>
-                                            <Setter Target="grid.Opacity" Value="0.2" />
-                                            <Setter Target="callingpoints.Visibility" Value="Collapsed"/>
+                                            <Setter Target="grid.Opacity" Value="0.5" />
+                                            <!--<Setter Target="callingpoints.Visibility" Value="Collapsed"/>-->
                                         </VisualState.Setters>
                                     </VisualState>
                                 </VisualStateGroup>
                             </VisualStateManager.VisualStateGroups>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="160"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Orientation="Vertical">
-                                <TextBlock VerticalAlignment="Top" FontSize="34" Text="{Binding std}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}" Margin="0,0,10,0"/>
-                                <TextBlock x:Name="etd" Visibility="Collapsed" VerticalAlignment="Top" FontSize="34" Text="{Binding etd}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="Red" Margin="0,0,10,0"/>
+                                <TextBlock VerticalAlignment="Top" FontSize="56" Text="{Binding std}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}" Margin="0,0,10,0"/>
+                                <TextBlock x:Name="etd" Visibility="Collapsed" VerticalAlignment="Top" FontSize="56" Text="{Binding etd}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="Red" Margin="0,0,10,0"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="10,0,0,0" Orientation="Vertical" HorizontalAlignment="Stretch">
-                                <TextBlock FontSize="34" Text="{Binding destination.location.locationName}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}"/>
-                                <TextBlock x:Name="callingpoints" FontSize="20" Text="{Binding subsequentCallingPoints}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}" HorizontalAlignment="Stretch" TextWrapping="WrapWholeWords" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock FontSize="56" Text="{Binding destination.location.locationName}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}"/>
+                                <!--<TextBlock x:Name="callingpoints" FontSize="20" Text="{Binding subsequentCallingPoints}" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}" HorizontalAlignment="Stretch" TextWrapping="WrapWholeWords" TextTrimming="CharacterEllipsis"/>-->
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Vertical">
-                                <TextBlock FontSize="34" TextAlignment="Center" Text="{Binding Converter={StaticResource StatusIconConverter}}" Foreground="{StaticResource primary}" FontFamily="Assets/materialdesignicons-webfont.ttf#Material Design Icons" ></TextBlock>
-                                <TextBlock TextAlignment="Right" Text="{Binding Weather}" TextWrapping="Wrap" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}"/>
+                                <TextBlock FontSize="56" TextAlignment="Center" Text="{Binding Converter={StaticResource StatusIconConverter}}" Foreground="{StaticResource primary}" FontFamily="Assets/materialdesignicons-webfont.ttf#Material Design Icons" ></TextBlock>
+                                <TextBlock TextAlignment="Right" Text="{Binding Weather}" FontSize="26" TextWrapping="Wrap" FontFamily="Assets/scoreboard.ttf#Score Board" Foreground="{StaticResource primary}"/>
                             </StackPanel>
                         </Grid>
                     </UserControl>

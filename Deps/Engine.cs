@@ -34,7 +34,7 @@ namespace Deps
         const int RUN_TIME_TO_STATION = 8;
         const int TOO_LATE = 6;
         const int TIME_WINDOW = 70;
-        const int MAX_ROWS = 20;
+        const int MAX_ROWS = 10;
 
 
         /// <summary>
@@ -244,15 +244,7 @@ namespace Deps
         {
             get
             {
-                return Expected.Subtract(DateTime.Now.TimeOfDay) - TimeSpan.FromMinutes((int)Engine.BoardStatus.TOOLATE);
-            }
-        }
-
-        public TimeSpan TimeLeftActual
-        {
-            get
-            {
-                return Expected.Subtract(DateTime.Now.TimeOfDay);
+                return Expected.Subtract(DateTime.Now.TimeOfDay) ;
             }
         }
 
@@ -319,7 +311,7 @@ namespace Deps
 
         public override bool Equals(object obj)
         {
-            return serviceIDField == (obj as trainServicesService).serviceIDField && etd == (obj as trainServicesService).etd && CurrentStatus== (obj as trainServicesService).CurrentStatus && IsLate == (obj as trainServicesService).IsLate && TimeLeft == (obj as trainServicesService).TimeLeft && TimeLeftActual == (obj as trainServicesService).TimeLeftActual;
+            return serviceIDField == (obj as trainServicesService).serviceIDField && etd == (obj as trainServicesService).etd && CurrentStatus== (obj as trainServicesService).CurrentStatus && IsLate == (obj as trainServicesService).IsLate && TimeLeft == (obj as trainServicesService).TimeLeft;
         }
 
         public override int GetHashCode()

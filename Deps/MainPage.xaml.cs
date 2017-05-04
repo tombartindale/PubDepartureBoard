@@ -45,23 +45,32 @@ namespace Deps
             var train = value as trainServicesService;
             //return "\uf098" + getnum((int)train.TimeLeft.TotalMinutes - (int)Engine.BoardStatus.RUNNOW) + "\uf583\u2086";
 
+            //TimeLeft is actual time left till the train leaves
+
             switch (train.CurrentStatus)
             {
+                // speed pint number man number
                 case Engine.BoardStatus.DRINKUP:
-                    return "\uf152\uf098" + getnum((int)train.TimeLeft.TotalMinutes) + " +\uf583" + getnum((int)Engine.BoardStatus.GONOW);
+                    return "\uf152\uf098" + getnum((int)Math.Round(train.TimeLeft.TotalMinutes - (double)Engine.BoardStatus.GONOW,0,MidpointRounding.AwayFromZero)) + " +\uf583" + getnum((int)Engine.BoardStatus.GONOW);
 
+                // man number
                 case Engine.BoardStatus.GONOW:
-                    return "\uf583" + getnum((int)(train.Expected - DateTime.Now.TimeOfDay).TotalMinutes);
+                    return "\uf583" + getnum((int)Math.Round((train.Expected - DateTime.Now.TimeOfDay).TotalMinutes,0,MidpointRounding.AwayFromZero));
 
+                //// pint number man number
+                //case Engine.BoardStatus.GETDRINK:
+                //    return "\uf098" + getnum((int)train.TimeLeft.TotalMinutes) + " +\uf583" +  getnum((int)Engine.BoardStatus.GONOW);
+
+                // pint number
                 case Engine.BoardStatus.GETDRINK:
-                    return "\uf098" + getnum((int)train.TimeLeft.TotalMinutes) + " +\uf583" +  getnum((int)Engine.BoardStatus.GONOW);
-
                 case Engine.BoardStatus.NORMAL:
-                    return "\uf098" + getnum((int)train.TimeLeft.TotalMinutes + (int)Engine.BoardStatus.GONOW);
+                    return  "\uf098" + getnum((int)Math.Round(train.TimeLeft.TotalMinutes - (double)Engine.BoardStatus.GONOW,0,MidpointRounding.AwayFromZero)) + " +\uf583" + getnum((int)Engine.BoardStatus.GONOW);
 
+                // manrun number
                 case Engine.BoardStatus.RUNNOW:
-                    return "\uf46e" + getnum((int)(train.Expected - DateTime.Now.TimeOfDay).TotalMinutes);
+                    return "\uf46e" + getnum((int)Math.Round((train.Expected - DateTime.Now.TimeOfDay).TotalMinutes,0,MidpointRounding.AwayFromZero));
 
+                // pint questionmark
                 case Engine.BoardStatus.TOOLATE:
                     return "\uf098?";
                 default:
@@ -163,6 +172,9 @@ namespace Deps
         private void Timer_Tick(object sender, object e)
         {
             time.Text = DateTime.Now.ToString("HH:mm");
+            //force re-render of the board times:
+            alltrains.ItemsSource = null;
+            alltrains.ItemsSource = engine.CurrentTrains;
         }
 
         private async void Engine_OnUpdate()
