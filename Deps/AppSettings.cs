@@ -11,8 +11,8 @@ namespace DepartureBoard
 {
     public sealed class AppSettings
     {
-        public string DARKSKY_API_KEY { get;set; }       // 91a059370a899851a4aa05a290ff0f4b
-        public string RAIL_API_KEY { get; set; }        // = "53bedd9b-1a10-4ce3-b645-07638c19c0d2";
+        public string DARKSKY_API_KEY { get;set; }       // 
+        public string RAIL_API_KEY { get; set; }        // =
         public string STATION_CRS { get; set; }         // = "DHM";
         public double LOCATION_LAT { get; set; }        // = 54.7794;
         public double LOCATION_LNG { get; set; }        // = -1.5817600000000311;
