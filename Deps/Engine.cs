@@ -9,39 +9,46 @@ using Windows.System.Threading;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Diagnostics;
-using ForecastIOPortable;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using DarkSkyApi;
+using DarkSkyApi.Models;
 
-namespace Deps
+namespace DepartureBoard
 {
     public class Engine
     {
-        /// <summary>
-        /// Constants & API Keys -- EDIT THESE!
-        /// </summary>
-        const string DARKSKY_API_KEY = "91a059370a899851a4aa05a290ff0f4b";
-        const string RAIL_API_KEY = "53bedd9b-1a10-4ce3-b645-07638c19c0d2";
-        const string STATION_CRS = "DHM";
-        const double LOCATION_LAT = 54.7794;
-        const double LOCATION_LNG = -1.5817600000000311;
-        /// <summary>
-        /// Optional things that can be changed
-        /// </summary>
-        const int GET_DRINK_TIME = 26;
-        const int DRINK_UP_TIME = 16;
-        const int WALK_TIME_TO_STATION = 10;
-        const int RUN_TIME_TO_STATION = 8;
-        const int TOO_LATE = 6;
-        const int TIME_WINDOW = 70;
-        const int MAX_ROWS = 10;
+        private AppSettings _settings;
+
+        public Engine(AppSettings settings)
+        {
+            _settings = settings;
+            //settings.OnChanged += Settings_OnChanged;
+            Settings_OnChanged();
+        }
+
+        private void Settings_OnChanged()
+        {
+            _weather = new DarkSkyService(_settings.DARKSKY_API_KEY);
+            BoardStatusValues.TOOLATE = _settings.TOO_LATE;
+            BoardStatusValues.RUNNOW = _settings.RUN_TIME_TO_STATION;
+            BoardStatusValues.GONOW = _settings.WALK_TIME_TO_STATION;
+            BoardStatusValues.DRINKUP = _settings.DRINK_UP_TIME;
+            BoardStatusValues.GETDRINK = _settings.GET_DRINK_TIME;
+        }
 
 
-        /// <summary>
-        /// DO NOT EDIT BELOW THIS LINE!
-        /// </summary>
-        public enum BoardStatus:int {TOOLATE = TOO_LATE, RUNNOW = RUN_TIME_TO_STATION,GONOW=WALK_TIME_TO_STATION, DRINKUP = DRINK_UP_TIME, GETDRINK = GET_DRINK_TIME, NORMAL };
-        ForecastApi weather = new ForecastApi(DARKSKY_API_KEY);
+        public enum BoardStatus { TOOLATE, RUNNOW, GONOW, DRINKUP, GETDRINK, NORMAL };
+
+        public static class BoardStatusValues {
+            public static int TOOLATE { get; internal set; }
+            public static int RUNNOW { get; internal set; }
+            public static int GONOW { get; internal set; }
+            public static int DRINKUP { get; internal set; }
+            public static int GETDRINK { get; internal set; }
+            public static int? NORMAL = null;
+        };
+        DarkSkyService _weather;
 
         private async Task GetBoard()
         {
@@ -50,16 +57,16 @@ namespace Deps
                 string xml = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 $"<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ns1=\"http://thalesgroup.com/RTTI/2016-02-16/ldb/\">" +
                 $"  <SOAP-ENV:Header xmlns:ns2=\"http://thalesgroup.com/RTTI/2010-11-01/ldb/commontypes\">" +
-                $"    <ns2:AccessToken><ns2:TokenValue>{RAIL_API_KEY}</ns2:TokenValue></ns2:AccessToken>" +
+                $"    <ns2:AccessToken><ns2:TokenValue>{_settings.RAIL_API_KEY}</ns2:TokenValue></ns2:AccessToken>" +
                 $"  </SOAP-ENV:Header>" +
                 $"  <SOAP-ENV:Body>" +
                 $"    <ns1:GetDepBoardWithDetailsRequest>" +
-                $"      <ns1:numRows>{MAX_ROWS}</ns1:numRows>" +
-                $"      <ns1:crs>{STATION_CRS}</ns1:crs>" +
+                $"      <ns1:numRows>{_settings.MAX_ROWS}</ns1:numRows>" +
+                $"      <ns1:crs>{_settings.STATION_CRS}</ns1:crs>" +
                 $"      <ns1:filterCrs></ns1:filterCrs>" +
                 $"      <ns1:filterType>from</ns1:filterType>" +
                 $"      <ns1:timeOffset>0</ns1:timeOffset>" +
-                $"      <ns1:timeWindow>{TIME_WINDOW}</ns1:timeWindow>" +
+                $"      <ns1:timeWindow>{_settings.TIME_WINDOW}</ns1:timeWindow>" +
                 $"    </ns1:GetDepBoardWithDetailsRequest>" +
                 $"  </SOAP-ENV:Body>" +
                 $"</SOAP-ENV:Envelope>";
@@ -134,12 +141,12 @@ namespace Deps
 
         private async Task GetWeather()
         {
-            var current_weather = await weather.GetWeatherDataAsync(LOCATION_LAT, LOCATION_LNG, Unit.UK, Language.English);
+            var current_weather = await _weather.GetWeatherDataAsync(_settings.LOCATION_LAT, _settings.LOCATION_LNG, Unit.UK, Language.English);
             LastWeatherMinutely = current_weather.Minutely;
             OnWeatherUpdate?.Invoke(current_weather.Currently.Icon);
         }
 
-        public static ForecastIOPortable.Models.MinutelyForecast LastWeatherMinutely { get; private set; }
+        public static MinutelyForecast LastWeatherMinutely { get; private set; }
     }
 
     /// <remarks/>
@@ -266,23 +273,23 @@ namespace Deps
             get
             {
                 var timeleft = Expected.Subtract(DateTime.Now.TimeOfDay);
-                if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.TOOLATE))
+                if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatusValues.TOOLATE))
                 {
                     return Engine.BoardStatus.TOOLATE;
                 }
-                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.RUNNOW))
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatusValues.RUNNOW))
                 {
                     return Engine.BoardStatus.RUNNOW;
                 }
-                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.GONOW))
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatusValues.GONOW))
                 {
                     return Engine.BoardStatus.GONOW;
                 }
-                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.DRINKUP))
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatusValues.DRINKUP))
                 {
                     return Engine.BoardStatus.DRINKUP;
                 }
-                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatus.GETDRINK))
+                else if (timeleft < TimeSpan.FromMinutes((int)Engine.BoardStatusValues.GETDRINK))
                 {
                     return Engine.BoardStatus.GETDRINK;
                 }

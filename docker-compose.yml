@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  deps:
+    image: deps
+    build:
+      context: .\Deps
+      dockerfile: Dockerfile

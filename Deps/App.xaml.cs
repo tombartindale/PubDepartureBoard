@@ -1,5 +1,4 @@
-﻿using Microsoft.HockeyApp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,7 +15,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace Deps
+namespace DepartureBoard
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -29,7 +28,6 @@ namespace Deps
         /// </summary>
         public App()
         {
-            Microsoft.HockeyApp.HockeyClient.Current.Configure("d47723e90e024f5dbe35a0c56745f815");
             this.InitializeComponent();
             this.Suspending += OnSuspending;
         }

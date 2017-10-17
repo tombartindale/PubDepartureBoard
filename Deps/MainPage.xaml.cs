@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
@@ -8,7 +9,7 @@ using Windows.UI.Xaml.Media.Imaging;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace Deps
+namespace DepartureBoard
 {
 
     public class TimeLeftConverter : IValueConverter
@@ -84,12 +85,13 @@ namespace Deps
         }
     }
 
+
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        Engine engine = new Engine();
+        Engine engine = new Engine(AppSettings.Current);
 
         public MainPage()
         {
@@ -98,6 +100,16 @@ namespace Deps
             engine.OnLatestData += Engine_OnLatestData;
             engine.OnWeatherUpdate += Engine_OnWeatherUpdate;
             Loaded += MainPage_Loaded;
+            AppSettings.Current.OnSettingsChanged += Current_OnSettingsChanged;
+        }
+
+        private async void Current_OnSettingsChanged()
+        {
+            engine = new Engine(AppSettings.Current);
+            await engine.InitLoad();
+            engine.OnUpdate += Engine_OnUpdate;
+            engine.OnLatestData += Engine_OnLatestData;
+            engine.OnWeatherUpdate += Engine_OnWeatherUpdate;
         }
 
         private async void Engine_OnWeatherUpdate(string obj)
@@ -155,13 +167,21 @@ namespace Deps
         {
             Application.Current.UnhandledException += Current_UnhandledException;
 
-            await engine.InitLoad();
-            alltrains.ItemsSource = engine.CurrentTrains;
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMinutes(1);
-            timer.Tick += Timer_Tick;
-            timer.Start();
-            Timer_Tick(null, null);
+            try
+            {
+                await engine.InitLoad();
+                alltrains.ItemsSource = engine.CurrentTrains;
+                DispatcherTimer timer = new DispatcherTimer();
+                timer.Interval = TimeSpan.FromMinutes(1);
+                timer.Tick += Timer_Tick;
+                timer.Start();
+                Timer_Tick(null, null);
+            }
+            catch (Exception ex)
+            {
+                //check for settings:
+                settingspanel.Visibility = Visibility.Visible;
+            }
         }
 
         private void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -185,6 +205,11 @@ namespace Deps
                 alltrains.ItemsSource = null;
                 alltrains.ItemsSource = engine.CurrentTrains;
             });
+        }
+
+        private void Grid_PointerPressed(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
+        {
+            settingspanel.Visibility = Visibility.Visible;
         }
     }
 }

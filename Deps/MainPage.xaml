@@ -1,9 +1,10 @@
 ﻿<Page
-    x:Class="Deps.MainPage"
+    x:Class="DepartureBoard.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Deps"
+    xmlns:local="using:DepartureBoard"
     xmlns:trig="using:UWPDataTrigger"
+    x:Name="mainwindow"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -12,7 +13,7 @@
         <local:TimeLeftConverter x:Key="TimeLeftConverter" />
         <local:StatusIconConverter x:Key="StatusIconConverter" />
     </Page.Resources>
-    <Grid Background="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid Background="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" PointerPressed="Grid_PointerPressed">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -27,7 +28,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Margin="10" Padding="10" FontSize="56" FontFamily="Assets/scoreboard.ttf#Score Board" x:Name="time"  HorizontalAlignment="Stretch" TextAlignment="Center" Foreground="#528626"/>
-            <TextBlock Grid.Column="1"   TextAlignment="Right" HorizontalAlignment="Stretch"  Padding="10" Text="It's" FontSize="36" FontFamily="Assets/scoreboard.ttf#Score Board" VerticalAlignment="Center" Foreground="#528626"/>
+            <TextBlock Grid.Column="1" TextAlignment="Right" HorizontalAlignment="Stretch"  Padding="10" Text="It's" FontSize="36" FontFamily="Assets/scoreboard.ttf#Score Board" VerticalAlignment="Center" Foreground="#528626"/>
             <TextBlock Grid.Column="2" x:Name="mainweather" TextAlignment="Center" Padding="10" FontSize="36" FontFamily="Assets/weathericons-regular-webfont.ttf#Weather Icons" VerticalAlignment="Center" Foreground="#528626"/>
             <TextBlock HorizontalAlignment="Stretch" Grid.Column="3" Padding="10" Text="outside" FontSize="36" FontFamily="Assets/scoreboard.ttf#Score Board" VerticalAlignment="Center" Foreground="#528626"/>
         </Grid>
@@ -102,5 +103,8 @@
             <Image Grid.Column="1"  Source="Assets/poweredby-oneline-darkbackground.png" HorizontalAlignment="Left" Height="30"></Image>
             <TextBlock Grid.Column="2" Padding="10" x:Name="updatedat" FontFamily="Assets/scoreboard.ttf#Score Board" Text="{Binding}" VerticalAlignment="Center"  HorizontalAlignment="Center" Foreground="White"/>
         </Grid>
+        <local:Settings x:Name="settingspanel" Grid.RowSpan="5" Visibility="Collapsed" >
+            
+        </local:Settings>
     </Grid>
 </Page>
