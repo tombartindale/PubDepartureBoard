@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -9,16 +10,26 @@ using Windows.Storage;
 
 namespace DepartureBoard
 {
-    public sealed class AppSettings
+    [DataContract]
+    public class AppSettings
     {
+        [DataMember]
         public string DARKSKY_API_KEY { get;set; }       // 
+        [DataMember]
         public string RAIL_API_KEY { get; set; }        // =
+        [DataMember]
         public string STATION_CRS { get; set; }         // = "DHM";
+        [DataMember]
         public double LOCATION_LAT { get; set; }        // = 54.7794;
+        [DataMember]
         public double LOCATION_LNG { get; set; }        // = -1.5817600000000311;
+        [DataMember]
         public int GET_DRINK_TIME { get; set; }         // = 26;
+        [DataMember]
         public int DRINK_UP_TIME { get; set; }          // = 16;
+        [DataMember]
         public int WALK_TIME_TO_STATION { get; set; }   // = 10;
+        [DataMember]
         public int FONT_SIZE { get; set; }
 
         private void Load()

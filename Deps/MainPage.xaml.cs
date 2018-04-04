@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Windows.Networking.Connectivity;
 using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media.Imaging;
+using System.Linq;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -52,7 +54,7 @@ namespace DepartureBoard
             {
                 // speed pint number man number
                 case Engine.BoardStatus.DRINKUP:
-                    return "\uf152\uf098" + getnum((int)Math.Round(train.TimeLeft.TotalMinutes - (double)Engine.BoardStatus.GONOW,0,MidpointRounding.AwayFromZero)) + " +\uf583" + getnum((int)Engine.BoardStatus.GONOW);
+                    return "\uf152\uf098" + getnum((int)Math.Round(train.TimeLeft.TotalMinutes - (double)Engine.BoardStatusValues.GONOW,0,MidpointRounding.AwayFromZero)) + " +\uf583" + getnum((int)Engine.BoardStatusValues.GONOW);
 
                 // man number
                 case Engine.BoardStatus.GONOW:
@@ -65,7 +67,7 @@ namespace DepartureBoard
                 // pint number
                 case Engine.BoardStatus.GETDRINK:
                 case Engine.BoardStatus.NORMAL:
-                    return  "\uf098" + getnum((int)Math.Round(train.TimeLeft.TotalMinutes - (double)Engine.BoardStatus.GONOW,0,MidpointRounding.AwayFromZero)) + " +\uf583" + getnum((int)Engine.BoardStatus.GONOW);
+                    return  "\uf098" + getnum((int)Math.Round(train.TimeLeft.TotalMinutes - (double)Engine.BoardStatusValues.GONOW,0,MidpointRounding.AwayFromZero)) + " +\uf583" + getnum((int)Engine.BoardStatusValues.GONOW);
 
                 // manrun number
                 case Engine.BoardStatus.RUNNOW:
@@ -105,11 +107,24 @@ namespace DepartureBoard
 
         private async void Current_OnSettingsChanged()
         {
-            engine = new Engine(AppSettings.Current);
-            await engine.InitLoad();
-            engine.OnUpdate += Engine_OnUpdate;
-            engine.OnLatestData += Engine_OnLatestData;
-            engine.OnWeatherUpdate += Engine_OnWeatherUpdate;
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,async () =>
+            {
+                try
+                {
+                    engine = new Engine(AppSettings.Current);
+                    await engine.InitLoad();
+                    engine.OnUpdate += Engine_OnUpdate;
+                    engine.OnLatestData += Engine_OnLatestData;
+                    engine.OnWeatherUpdate += Engine_OnWeatherUpdate;
+                    settingspanel.Visibility = Visibility.Collapsed;
+                }
+                catch
+                {
+                    //failed to work...
+                    //show settings screen
+                    settingspanel.Visibility = Visibility.Visible;
+                }
+            });
         }
 
         private async void Engine_OnWeatherUpdate(string obj)

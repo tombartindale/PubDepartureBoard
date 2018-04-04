@@ -16,27 +16,28 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Margin="10" FontSize="50" FontFamily="Segoe UI Light">Configuration</TextBlock>
+        <TextBlock Visibility="Collapsed" Grid.Row="0" Margin="10" FontSize="50" FontFamily="Segoe UI Light">Configuration</TextBlock>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <StackPanel Visibility="Collapsed" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 <TextBox Header="Rail API Key" Margin="10" Text="{Binding Path=RAIL_API_KEY, Mode=TwoWay}" FontSize="20"/>
                 <TextBox Header="Darksky API Key" Margin="10" Text="{Binding Path=DARKSKY_API_KEY, Mode=TwoWay}" FontSize="20"/>
                 <TextBox Header="Station Code" Margin="10" Text="{Binding Path=STATION_CRS, Mode=TwoWay}" FontSize="20"/>
                 <TextBox Header="Location Latitude" Margin="10" Text="{Binding Path=LOCATION_LAT, Mode=TwoWay}" FontSize="20"/>
                 <TextBox Header="Location Longitude" Margin="10" Text="{Binding Path=LOCATION_LNG, Mode=TwoWay}" FontSize="20"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <StackPanel Visibility="Collapsed" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 <TextBox Header="Time Left to Get a Drink" Margin="10" TextWrapping="Wrap" Text="{Binding Path=GET_DRINK_TIME, Mode=TwoWay}" FontSize="20"/>
                 <TextBox Header="Time Left to Drink Up" Margin="10" TextWrapping="Wrap" Text="{Binding Path=DRINK_UP_TIME, Mode=TwoWay}" FontSize="20"/>
                 <TextBox Header="Walk Time to Station" Margin="10" TextWrapping="Wrap" Text="{Binding Path=WALK_TIME_TO_STATION, Mode=TwoWay}" FontSize="20"/>
                 <!--<Slider x:Name="fontsize" Header="Font Size" Margin="10" Value="{Binding Path=FONT_SIZE , Mode=TwoWay}"></Slider>-->
                 
             </StackPanel>
+            <TextBlock Grid.ColumnSpan="4" Grid.Row="1" FontSize="48" TextAlignment="Center" x:Name="hostname" VerticalAlignment="Center" TextWrapping="WrapWholeWords" FontFamily="Segoe UI">Visit http://????:???/departureboard/ in your browser to change settings.</TextBlock>
         </Grid>
-        <Button Grid.Row="2" Click="Button_Click" HorizontalAlignment="Right" FontSize="28" Margin="10" VerticalAlignment="Bottom">Update Settings</Button>
+        <Button Grid.Row="2" Visibility="Collapsed" Click="Button_Click" HorizontalAlignment="Right" FontSize="28" Margin="10" VerticalAlignment="Bottom">Update Settings</Button>
     </Grid>
 </UserControl>
