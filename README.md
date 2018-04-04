@@ -7,7 +7,7 @@ Windows Universal application which displays live UK train departure information
 1. Install Windows IoT onto an embedded device (tested on RPi3) https://developer.microsoft.com/en-us/windows/iot/getstarted/prototype/setupdevice
 2. Follow the instructions to setup your device on your network (WiFi or Ethernet).
 3. Visit the admin panel of the device (using IoT Core Dashboard) https://developer.microsoft.com/en-us/windows/iot/Downloads
-4. Install the application from the Downloads link.
+4. Install the application from the Downloads link https://github.com/tombartindale/PubDepartureBoard/releases/download/v1/DepartureBoard_1.0.5.0_Test.zip.
 5. Set the application to be the Main Application when the device starts.
 5. Set the screen resolution to match your output display.
 6. Restart the device.
